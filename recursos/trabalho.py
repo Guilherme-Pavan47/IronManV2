@@ -1,1 +1,1 @@
-import main
+from funcoes import inicializarBancoDeDados, limpar_tela, escreverDados, maior_pontuador

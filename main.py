@@ -219,7 +219,7 @@ def bemVindo():
         tela.blit(textoNome, (tamanho[0]//2 - textoNome.get_width()//2, 150))
  
         mecanica = [
-            "Como jogar:",
+            " jogar:",
             "- Use as setas CIMA e BAIXO para mover o personagem.",
             "- Desvie dos mísseis que vêm em sua direção.",
             "- Cada míssil desviado vale 1 ponto.",
