@@ -1,60 +1,63 @@
-import os, time
+import os
+import time
 import json
 from datetime import datetime
 
+
 def limpar_tela():
-    os.system("cls")
-    
+    os.system("cls" if os.name == "nt" else "clear")
+
+
 def aguarde(segundos):
     time.sleep(segundos)
-    
+
+
 def inicializarBancoDeDados():
-    # r - read, w - write, a - append
     try:
-        banco = open("base.atitus","r")
-    except:
-        print("Banco de Dados Inexistente. Criando...")
-        banco = open("base.atitus","w")
-    
+        with open("log.dat", "r"):
+            pass
+    except FileNotFoundError:
+        with open("log.dat", "w") as f:
+            f.write("[]")
+
+
 def escreverDados(nome, pontos):
-    # INI - inserindo no arquivo
-    banco = open("base.atitus","r")
-    dados = banco.read()
-    banco.close()
-    if dados != "":
-        dadosDict = json.loads(dados)
-    else:
-        dadosDict = {}
-        
-    data_br = datetime.now().strftime("%d/%m/%Y")
-    dadosDict[nome] = (pontos, data_br)
-    
-    banco = open("base.atitus","w")
-    banco.write(json.dumps(dadosDict))
-    banco.close()
-    
-    # END - inserindo no arquivo
-    
+    with open("log.dat", "r") as f:
+        dados = f.read()
+
+    logList = json.loads(dados) if dados.strip() else []
+
+    agora   = datetime.now()
+    data_br = agora.strftime("%d/%m/%Y")
+    hora_br = agora.strftime("%H:%M:%S")
+
+    logList.append({
+        "nome":   nome,
+        "pontos": pontos,
+        "data":   data_br,
+        "hora":   hora_br
+    })
+
+    with open("log.dat", "w") as f:
+        f.write(json.dumps(logList, ensure_ascii=False, indent=2))
+
+
 def maior_pontuador():
-    banco = open("base.atitus","r")
-    dados = banco.read()
-    banco.close()
-    if dados != "":
-        dadosDict = json.loads(dados)
-    else:
-        dadosDict = {}
+    with open("log.dat", "r") as f:
+        dados = f.read()
 
-    nome_maior = None
-    dataJogada =  None
-    maior_pontos = -1
+    logList = json.loads(dados) if dados.strip() else []
 
-    for nome, info in dadosDict.items():
+    nome_maior   = "---"
+    dataJogada   = "---"
+    horaJogada   = "---"
+    maior_pontos = 0
 
-        pontos = info[0]
-        
-        if pontos > maior_pontos:
-            maior_pontos = pontos
-            nome_maior = nome
-            dataJogada = info[1]            
+    for registro in logList:
+        if registro["pontos"] > maior_pontos:
+            maior_pontos = registro["pontos"]
+            nome_maior   = registro["nome"]
+            dataJogada   = registro["data"]
+            horaJogada   = registro["hora"]
 
-    return nome_maior, maior_pontos, dataJogada
+    return nome_maior, maior_pontos, dataJogada, horaJogada  # ← 4 valores
