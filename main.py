@@ -8,7 +8,7 @@ from recursos.funcoes import (
     maior_pontuador,
 )
 
-# ── Inicialização geral ────────────────────────────────────────────────────────
+
 limpar_tela()
 inicializarBancoDeDados()
 
@@ -50,7 +50,7 @@ fonteMenu    = pygame.font.SysFont("comicsans", 18)
 fonteBotao   = pygame.font.SysFont("comicsans", 20)
 
 
-# ── Jogo ───────────────────────────────────────────────────────────────────────
+
 def jogar():
     pausado = False
     posicaoXPersona      = 0
@@ -95,7 +95,7 @@ def jogar():
                 else:
                     pygame.mixer.music.unpause()
 
-        # Pulso da lua
+        
         pulsando += 0.15 * direcaoPulso
         if pulsando >= 8:
             direcaoPulso = -1
@@ -104,7 +104,7 @@ def jogar():
         tamanhoAtualLua   = int(tamanhoLua + pulsando)
         luaRedimensionada = pygame.transform.scale(lua, (tamanhoAtualLua, tamanhoAtualLua))
 
-        # Pausa
+        
         if pausado:
             fontePausa = pygame.font.SysFont("comicsans", 72, bold=True)
             textoPausa = fontePausa.render("PAUSE", True, (255, 215, 0))
@@ -118,7 +118,7 @@ def jogar():
             relogio.tick(60)
             continue
 
-        # Movimento
+        
         posicaoYPersona += movimentoYPersona
         posicaoYPersona  = max(0, min(posicaoYPersona, 649))
 
@@ -130,7 +130,7 @@ def jogar():
             velocidadeMissel += 1
             posicaoYMissel    = random.randint(0, 650)
 
-        # Desenho
+        
         tela.fill(branco)
         tela.blit(fundo, (0, 0))
         tela.blit(luaRedimensionada, (tamanho[0] - tamanhoAtualLua - 10, 10))
@@ -144,7 +144,7 @@ def jogar():
         textoDica = fonteDica.render("Press Space to Pause Game  |  Press ESC to close the game", True, (200, 200, 200))
         tela.blit(textoDica, (tamanho[0] // 2 - textoDica.get_width() // 2, 40))
 
-        # Colisão
+        
         retPersona = pygame.Rect(posicaoXPersona, posicaoYPersona, 116, 51)
         retMissel  = pygame.Rect(posicaoXMissel,  posicaoYMissel,  125, 25)
 
@@ -158,14 +158,14 @@ def jogar():
         relogio.tick(60)
 
 
-# ── Tela de morte ──────────────────────────────────────────────────────────────
+
 def dead(pontos_partida):
     nome_m, pts_m, data_m, hora_m = maior_pontuador()
 
     fonteInfo    = pygame.font.SysFont("comicsans", 22, bold=True)
     fontePequena = pygame.font.SysFont("comicsans", 18)
 
-    # Mede o texto do botão para o botão se ajustar ao conteúdo
+    
     labelBotao  = fonteBotao.render("Reiniciar o Jogo", True, preto)
     padding     = 30
     largura_btn = labelBotao.get_width()  + padding * 2
@@ -198,7 +198,7 @@ def dead(pontos_partida):
         pygame.display.update()
         return btn_rect
 
-    # Mostra a tela antes de falar
+    
     btn_rect = desenhar()
 
     engine = pyttsx3.init()
@@ -224,7 +224,7 @@ def dead(pontos_partida):
         relogio.tick(60)
 
 
-# ── Tela de boas-vindas ────────────────────────────────────────────────────────
+
 def bemVindo():
     largura_btn  = 200
     altura_btn   = 50
@@ -295,7 +295,7 @@ def bemVindo():
         relogio.tick(60)
 
 
-# ── Loop raiz ──────────────────────────────────────────────────────────────────
+
 bemVindo()
 while True:
     pontos_finais = jogar()
