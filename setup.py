@@ -1,20 +1,8 @@
-# pip install cx_freeze
-import cx_Freeze
-executaveis = [ 
-               cx_Freeze.Executable(
-                   script="main.py", 
-                   icon="assets/icone.ico",
-                    target_name="IronManMarcao.exe"
-                   ) ]
-cx_Freeze.setup(
-    name = "Iron Man",
-    options={
-        "build_exe":{
-            "packages":["pygame"],
-            "include_files":["assets","recursos"]
-        }
-    }, executables = executaveis
-)
+from cx_Freeze import setup, Executable
 
-# python setup.py build
-# python setup.py bdist_msi
+setup(
+    name="GTA SAN ANDREAS",
+    version="1.0",
+    description="JOGO GTA SAN ANDREAS",
+    executables=[Executable("main.py", base="gui")]
+)

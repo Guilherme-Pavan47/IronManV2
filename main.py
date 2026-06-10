@@ -1,12 +1,14 @@
 import pygame
 import random
 import pyttsx3
+import math
 from recursos.funcoes import (
     inicializarBancoDeDados,
     limpar_tela,
     escreverDados,
     maior_pontuador,
 )
+from recursos.trabalho import contar_regressiva
 
 
 limpar_tela()
@@ -24,7 +26,7 @@ while True:
         print("Nome Inválido!")
 
 tamanho = (1000, 700)
-pygame.display.set_caption("CJ POR LOCO")
+pygame.display.set_caption("GTA SAN ANDREAS")
 icone = pygame.image.load("base/iconeMulher.png")
 pygame.display.set_icon(icone)
 relogio = pygame.time.Clock()
@@ -37,18 +39,42 @@ fundoDead  = pygame.image.load("base/seFodeu1.jpg")
 fundoStart = pygame.image.load("base/imagemInicialGta1.jpg")
 
 lua    = pygame.image.load("base/lua5.png")
-iron   = pygame.image.load("base/cj1.png")
-iron   = pygame.transform.scale(iron,   (116, 51))
-missel = pygame.image.load("base/municao.png")
-missel = pygame.transform.scale(missel, (125, 50))
+cj   = pygame.image.load("base/cj1.png")
+cj   = pygame.transform.scale(cj,   (116, 51))
+tiro = pygame.image.load("base/municao.png")
+tiro = pygame.transform.scale(tiro, (125, 50))
 
-missileSound  = pygame.mixer.Sound("base/tiro.mp3")
-explosaoSound = pygame.mixer.Sound("base/fraseDeMorteCj.mp3")
+
+aviao_img_original = pygame.image.load("base/aviao2.webp").convert_alpha()
+aviao_img_original = pygame.transform.scale(aviao_img_original, (160, 70))
+
+tiroSound  = pygame.mixer.Sound("base/tiro.mp3")
+morteSound = pygame.mixer.Sound("base/fraseDeMorteCj.mp3")
 pygame.mixer.music.load("base/musicaDeFundoGta.mp3")
 
 fonteMenu    = pygame.font.SysFont("comicsans", 18)
 fonteBotao   = pygame.font.SysFont("comicsans", 20)
 
+
+def bezier(p0, p1, p2, p3, t):
+    x = (1-t)**3 * p0[0] + 3*(1-t)**2*t * p1[0] + 3*(1-t)*t**2 * p2[0] + t**3 * p3[0]
+    y = (1-t)**3 * p0[1] + 3*(1-t)**2*t * p1[1] + 3*(1-t)*t**2 * p2[1] + t**3 * p3[1]
+    return x, y
+
+
+def bezier_angulo(p0, p1, p2, p3, t):
+    dt = 0.01
+    t2 = min(t + dt, 1.0)
+    x1, y1 = bezier(p0, p1, p2, p3, t)
+    x2, y2 = bezier(p0, p1, p2, p3, t2)
+    return math.degrees(math.atan2(y2 - y1, x2 - x1))
+
+
+
+P0 = (1160, 185)
+P1 = (650,  120)
+P2 = (200,   20)
+P3 = (-160,  30)
 
 
 def jogar():
@@ -57,13 +83,20 @@ def jogar():
     posicaoYPersona      = 60
     movimentoYPersona    = 0
     velocidadeMovPersona = 5
-    posicaoXMissel       = 800
-    posicaoYMissel       = 100
-    velocidadeMissel     = 2
+    posicaoXtiro       = 800
+    posicaoYtiro       = 100
+    velocidadetiro     = 2
     pontos               = 0
 
-    pygame.mixer.Sound.play(missileSound)
+    aviao_t          = 0.0
+    velocidade_aviao = 0.0015
+
+    pygame.mixer.Sound.play(tiroSound)
     pygame.mixer.music.play(-1)
+
+    
+    fonte_countdown = pygame.font.SysFont("comicsans", 150, bold=True)
+    contar_regressiva(tela, fonte_countdown)
 
     tamanhoLua   = 150
     pulsando     = 0.0
@@ -95,7 +128,6 @@ def jogar():
                 else:
                     pygame.mixer.music.unpause()
 
-        
         pulsando += 0.15 * direcaoPulso
         if pulsando >= 8:
             direcaoPulso = -1
@@ -104,7 +136,6 @@ def jogar():
         tamanhoAtualLua   = int(tamanhoLua + pulsando)
         luaRedimensionada = pygame.transform.scale(lua, (tamanhoAtualLua, tamanhoAtualLua))
 
-        
         if pausado:
             fontePausa = pygame.font.SysFont("comicsans", 72, bold=True)
             textoPausa = fontePausa.render("PAUSE", True, (255, 215, 0))
@@ -118,24 +149,35 @@ def jogar():
             relogio.tick(60)
             continue
 
-        
         posicaoYPersona += movimentoYPersona
         posicaoYPersona  = max(0, min(posicaoYPersona, 649))
 
-        posicaoXMissel -= velocidadeMissel
-        if posicaoXMissel < -125:
-            pygame.mixer.Sound.play(missileSound)
-            posicaoXMissel    = 800
+        posicaoXtiro -= velocidadetiro
+        if posicaoXtiro < -125:
+            pygame.mixer.Sound.play(tiroSound)
+            posicaoXtiro    = 800
             pontos           += 1
-            velocidadeMissel += 1
-            posicaoYMissel    = random.randint(0, 650)
+            velocidadetiro += 1
+            posicaoYtiro    = random.randint(0, 650)
 
         
+        aviao_t += velocidade_aviao
+        if aviao_t > 1.0:
+            aviao_t = 0.0
+
+        aviao_x, aviao_y = bezier(P0, P1, P2, P3, aviao_t)
+        angulo           = bezier_angulo(P0, P1, P2, P3, aviao_t)
+
+        aviao_rotacionado = pygame.transform.rotate(aviao_img_original, -angulo + 180)
+        aviao_rotacionado.set_alpha(190)
+        rect_aviao = aviao_rotacionado.get_rect(center=(int(aviao_x), int(aviao_y)))
+
         tela.fill(branco)
         tela.blit(fundo, (0, 0))
         tela.blit(luaRedimensionada, (tamanho[0] - tamanhoAtualLua - 10, 10))
-        tela.blit(iron,   (posicaoXPersona, posicaoYPersona))
-        tela.blit(missel, (posicaoXMissel,  posicaoYMissel))
+        tela.blit(aviao_rotacionado, rect_aviao)
+        tela.blit(cj,   (posicaoXPersona, posicaoYPersona))
+        tela.blit(tiro, (posicaoXtiro,  posicaoYtiro))
 
         texto = fonteMenu.render("Pontos: " + str(pontos), True, branco)
         tela.blit(texto, (tamanho[0] // 2 - texto.get_width() // 2, 15))
@@ -144,19 +186,17 @@ def jogar():
         textoDica = fonteDica.render("Press Space to Pause Game  |  Press ESC to close the game", True, (200, 200, 200))
         tela.blit(textoDica, (tamanho[0] // 2 - textoDica.get_width() // 2, 40))
 
-        
         retPersona = pygame.Rect(posicaoXPersona, posicaoYPersona, 116, 51)
-        retMissel  = pygame.Rect(posicaoXMissel,  posicaoYMissel,  125, 25)
+        rettiro  = pygame.Rect(posicaoXtiro,  posicaoYtiro,  125, 25)
 
-        if retPersona.colliderect(retMissel):
+        if retPersona.colliderect(rettiro):
             escreverDados(nome, pontos)
             pygame.mixer.music.stop()
-            pygame.mixer.Sound.play(explosaoSound)
+            pygame.mixer.Sound.play(morteSound)
             return pontos
 
         pygame.display.update()
         relogio.tick(60)
-
 
 
 def dead(pontos_partida):
@@ -165,7 +205,6 @@ def dead(pontos_partida):
     fonteInfo    = pygame.font.SysFont("comicsans", 22, bold=True)
     fontePequena = pygame.font.SysFont("comicsans", 18)
 
-    
     labelBotao  = fonteBotao.render("Reiniciar o Jogo", True, preto)
     padding     = 30
     largura_btn = labelBotao.get_width()  + padding * 2
@@ -178,10 +217,7 @@ def dead(pontos_partida):
 
         btn_rect = pygame.Rect(btn_x, btn_y, largura_btn, altura_btn)
         pygame.draw.rect(tela, branco, btn_rect, border_radius=15)
-        tela.blit(labelBotao, (
-            btn_x + padding,
-            btn_y + 7,
-        ))
+        tela.blit(labelBotao, (btn_x + padding, btn_y + 7))
 
         textoSua = fonteInfo.render(f"Sua pontuação: {pontos_partida} pontos", True, (255, 215, 0))
         tela.blit(textoSua, (tamanho[0] // 2 - textoSua.get_width() // 2, 555))
@@ -198,7 +234,6 @@ def dead(pontos_partida):
         pygame.display.update()
         return btn_rect
 
-    
     btn_rect = desenhar()
 
     engine = pyttsx3.init()
@@ -211,18 +246,15 @@ def dead(pontos_partida):
             if evento.type == pygame.QUIT:
                 pygame.quit()
                 quit()
-
             elif evento.type == pygame.KEYDOWN and evento.key == pygame.K_ESCAPE:
                 pygame.quit()
                 quit()
-
             elif evento.type == pygame.MOUSEBUTTONUP:
                 if btn_rect.collidepoint(evento.pos):
                     return True
 
         btn_rect = desenhar()
         relogio.tick(60)
-
 
 
 def bemVindo():
@@ -237,17 +269,14 @@ def bemVindo():
             if evento.type == pygame.QUIT:
                 pygame.quit()
                 quit()
-
             elif evento.type == pygame.KEYDOWN and evento.key == pygame.K_ESCAPE:
                 pygame.quit()
                 quit()
-
             elif evento.type == pygame.MOUSEBUTTONDOWN:
                 btn_rect = pygame.Rect(tamanho[0] // 2 - largura_btn // 2, 560, largura_btn, altura_btn)
                 if btn_rect.collidepoint(evento.pos):
                     largura_btn = 190
                     altura_btn  = 45
-
             elif evento.type == pygame.MOUSEBUTTONUP:
                 btn_rect = pygame.Rect(tamanho[0] // 2 - largura_btn // 2, 560, largura_btn, altura_btn)
                 if btn_rect.collidepoint(evento.pos):
@@ -293,7 +322,6 @@ def bemVindo():
 
         pygame.display.update()
         relogio.tick(60)
-
 
 
 bemVindo()

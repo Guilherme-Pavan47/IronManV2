@@ -1,1 +1,0 @@
-## Código Criado na Disciplina de Pensamento Computacional

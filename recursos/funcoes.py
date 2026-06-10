@@ -60,4 +60,4 @@ def maior_pontuador():
             dataJogada   = registro["data"]
             horaJogada   = registro["hora"]
 
-    return nome_maior, maior_pontos, dataJogada, horaJogada  # ← 4 valores
+    return nome_maior, maior_pontos, dataJogada, horaJogada

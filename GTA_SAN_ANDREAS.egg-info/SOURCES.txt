@@ -1,0 +1,6 @@
+README.md
+setup.py
+GTA_SAN_ANDREAS.egg-info/PKG-INFO
+GTA_SAN_ANDREAS.egg-info/SOURCES.txt
+GTA_SAN_ANDREAS.egg-info/dependency_links.txt
+GTA_SAN_ANDREAS.egg-info/top_level.txt
