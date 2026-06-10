@@ -267,6 +267,7 @@ def bemVindo():
             "Como jogar:",
             "- Use as setas CIMA e BAIXO para mover o personagem.",
             "- Desvie dos tiros seis que vêm em sua direção.",
+            "- Desvie dos tiros que vêm em sua direção.",
             "- Cada tiro desviado vale 1 ponto.",
             "- A velocidade aumenta a cada tiro desviado.",
             "- O jogo termina quando você for atingido!",
